@@ -1,5 +1,5 @@
 import logging
-from typing import Callable
+from typing import Callable, Any, Awaitable
 
 from aio_pika import Message, connect
 from aio_pika.abc import (
@@ -43,17 +43,10 @@ class RabbitAccessor:
             await self.connection.close()
         self.logger.info(f"{self.__class__.__name__} disconnected")
 
-    async def create_queue(self, queue_name: str = "rpc_queue",
-                           on_response: Callable[[AbstractIncomingMessage], None] = None) -> AbstractQueue:
-        on_response = on_response or self.on_response
+    async def consume(self, queue_name: str = "rpc_queue",
+                      callback: Callable[[AbstractIncomingMessage], Awaitable[Any]] = None):
         queue = await self.channel.declare_queue(exclusive=True, name=queue_name)
-        await queue.consume(on_response, no_ack=True)
-
-    async def on_response(self, message: AbstractIncomingMessage) -> None:
-        if message.correlation_id is None:
-            print(f"Bad message {message!r}")
-            return
-        print(f"Got response: {message!r}")
+        await queue.consume(callback, no_ack=True)
 
     def is_connected(self) -> bool:
         if getattr(self, "connection", None):
