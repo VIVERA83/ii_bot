@@ -29,12 +29,16 @@ class TgBotAccessor:
         Pattern, Callable[[Any], Coroutine[None, None, None]]
     ]
 
-    def __init__(self, settings: TgSettings = TgSettings(),
-                 logger: logging.Logger = logging.getLogger(__name__)
-                 ) -> None:
+    def __init__(
+        self,
+        settings: TgSettings = TgSettings(),
+        logger: logging.Logger = logging.getLogger(__name__),
+    ) -> None:
         self.settings = settings
         self.logger = logger
-        self._client = TelegramClient("bot", api_hash=self.settings.tg_api_hash, api_id=self.settings.tg_api_id)
+        self._client = TelegramClient(
+            "bot", api_hash=self.settings.tg_api_hash, api_id=self.settings.tg_api_id
+        )
         self.__commands = []
         self.__document_handlers = {}
         self.__command_handlers = {}
@@ -66,6 +70,7 @@ class TgBotAccessor:
                         handler = _handler
                         break
         if handler:
+            self.logger.warning(f"Command: {event.raw_text}")
             try:
                 result = await handler(*event.raw_text.split()[1:], event=event)  # noqa
                 if isinstance(result, BytesIO):
@@ -85,19 +90,19 @@ class TgBotAccessor:
         return self.__document_handlers.get(command)
 
     async def add_commands(
-            self, commands: list[tuple[str, str, Callable[[], Coroutine]]]
+        self, commands: list[tuple[str, str, Callable[[], Coroutine]]]
     ):
         self.__commands.extend(commands)
         await self.__update_commands()
         self.__update_command_handlers()
 
     async def update_document_command_handler(
-            self, commands: dict[str, Callable[[], Coroutine]]
+        self, commands: dict[str, Callable[[], Coroutine]]
     ):
         self.__document_handlers.update(commands)
 
     async def remove_commands(
-            self, commands: list[tuple[str, str, Callable[[], Coroutine]]]
+        self, commands: list[tuple[str, str, Callable[[], Coroutine]]]
     ):
         for command in commands:
             if command in self.__commands:
@@ -109,7 +114,7 @@ class TgBotAccessor:
         await self.__update_commands()
 
     def update_regex_command_handler(
-            self, command: dict[Pattern, Callable[[Any], Coroutine]]
+        self, command: dict[Pattern, Callable[[Any], Coroutine]]
     ):
         self.__commands_regex_handler.update(command)
 

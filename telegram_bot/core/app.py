@@ -1,4 +1,5 @@
 """The location of the final assembly of the application."""
+
 import asyncio
 
 from app import Application

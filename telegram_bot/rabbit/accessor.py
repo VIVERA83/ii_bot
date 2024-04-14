@@ -21,16 +21,23 @@ class RabbitAccessor:
     exchange: AbstractExchange
     queue: AbstractQueue
 
-    def __init__(self, settings: RabbitMQSettings = RabbitMQSettings(),
-                 logger: logging.Logger = logging.getLogger(__name__),
-                 ) -> None:
+    def __init__(
+        self,
+        settings: RabbitMQSettings = RabbitMQSettings(),
+        logger: logging.Logger = logging.getLogger(__name__),
+    ) -> None:
         self.settings = settings
         self.queue_name = "rpc_queue"
         self.logger = logger
 
     async def reply_to(self, message: AbstractIncomingMessage, response: bytes) -> None:
-        await self.exchange.publish(Message(body=response, correlation_id=message.correlation_id, ),
-                                    routing_key=message.reply_to, )
+        await self.exchange.publish(
+            Message(
+                body=response,
+                correlation_id=message.correlation_id,
+            ),
+            routing_key=message.reply_to,
+        )
         self.logger.debug(f" [x] Sent {response!r}")
 
     async def connect(self) -> None:
@@ -48,7 +55,9 @@ class RabbitAccessor:
     async def create_queue(self) -> AbstractQueue:
         return await self.channel.declare_queue(exclusive=True)
 
-    async def publish(self, reply_to: str, routing_key: str, correlation_id: str, body: bytes):
+    async def publish(
+        self, reply_to: str, routing_key: str, correlation_id: str, body: bytes
+    ):
         return await self.channel.default_exchange.publish(
             Message(
                 body=body,

@@ -1,4 +1,5 @@
 """The application launcher."""
+
 import asyncio
 
 from core.app import run_app
