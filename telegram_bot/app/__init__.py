@@ -1,7 +1,12 @@
 import asyncio
+import json
 import logging
+import uuid
+from typing import MutableMapping
 
 from aio_pika.abc import AbstractIncomingMessage
+from aio_pika import Message
+from telethon.events import NewMessage
 
 from bot.accessor import TgBotAccessor
 from rabbit.accessor import RabbitAccessor
@@ -12,29 +17,49 @@ class Application:
         self.bot = bot
         self.rabbit = rabbit
         self.logger = logger
+        self.callback_queue = None
+        self.in_queue = None
+        self.futures: MutableMapping[str, asyncio.Future] = {}
 
     async def start(self):
         await asyncio.gather(self._wait_connect(self.rabbit), self._wait_connect(self.bot))
-        await self.bot.add_commands([("test", "тестовая команда", self._command)])
+        await self.bot.add_commands([("test", "тестовая команда", self._command)])  # noqa
         self.logger.info("Application started")
-        # await self.rabbit.consume("rpc_queue", callback=self._on_response)
+        await self.rabbit.channel.declare_queue(exclusive=True)
+        self.callback_queue = await self.rabbit.create_queue()
+        await asyncio.gather(self.callback_queue.consume(callback=self._on_response, no_ack=True))
 
     async def stop(self):
         await self.rabbit.disconnect()
         await self.bot.disconnect()
         self.logger.info("Application stopped")
 
-    async def _command(self, *_, **__):
+    async def _command(self, event: NewMessage.Event):
+        data = {"login": "sergievskiy_an", "password": "QQQQqqqq5555", "course_type": "z"}
+
+        correlation_id = str(uuid.uuid4())
+        loop = asyncio.get_running_loop()
+        future = loop.create_future()
+
+        self.futures[correlation_id] = future
+        await self.rabbit.publish(routing_key="rpc_queue",
+                                  correlation_id=correlation_id,
+                                  reply_to=self.callback_queue.name,
+                                  body=json.dumps(data).encode("utf-8"), )
         self.logger.debug("Incoming test command")
-        await asyncio.sleep(5)
-        self.logger.debug("Success test command and outgoing message")
-        return "Test command successfully executed"
+        return "Запрос принят, ожидается ответ"
 
     async def _on_response(self, message: AbstractIncomingMessage) -> None:
         if message.correlation_id is None:
             print(f"Bad message {message!r}")
             return
-        print(f"Got response: {message!r}")
+        future: asyncio.Future = self.futures.pop(message.correlation_id)
+        future.set_result(message.body)
+        result = await future
+        response = await self.bot.send_message("vivera83", json.dumps(result.decode("utf-8")))
+        self.logger.warning(f"Got response: {result!r}")
+        # return "Yes"
+        # print(f"Got response: {message!r}")
 
     # не используется
     async def _wait_connect(self, client: TgBotAccessor | RabbitAccessor):
@@ -42,46 +67,3 @@ class Application:
             await asyncio.sleep(0.5)
             self.logger.debug(f"Wait connect {client.__class__.__name__}")
         self.logger.debug(f"Connected {client.__class__.__name__}")
-#
-# async def app(bot: TgBotAccessor, rabbit: RabbitAccessor, logger: logging.Logger):
-#     ...
-#     # async def wait_connect(client: TgBotAccessor | RabbitAccessor):
-#     #     while not client.is_connected():
-#     #         await asyncio.sleep(0.5)
-#     #         logger.debug(f"Wait connect {client.__class__.__name__}")
-#     #     logger.debug(f"Connected {client.__class__.__name__}")
-#     #
-#     # async def command(*_, **__):
-#     #     logger.debug("Incoming test command")
-#     #     await asyncio.sleep(5)
-#     #     logger.debug("Success test command and outgoing message")
-#     #     return "Test command successfully executed"
-#     #
-#     # async def on_response(message: AbstractIncomingMessage) -> None:
-#     #     if message.correlation_id is None:
-#     #         print(f"Bad message {message!r}")
-#     #         return
-#     #     print(f"Got response: {message!r}")
-#
-#     # await asyncio.gather(wait_connect(rabbit), wait_connect(bot))
-#     # await bot.add_commands([("test", "тестовая команда", command), ])
-#
-#     data = {"login": "sergievskiy_an", "password": "QQQQqqqq5555", "course_type": "z1"}
-#
-#     # await rabbit.consume("rpc_queue", callback=on_response)
-#     # channel.default_exchange.publish(
-#     #     Message(
-#     #         json.dumps(data).encode(),
-#     #         content_type="text/plain",
-#     correlation_id = correlation_id,
-#     # reply_to=callback_queue.name,
-#
-#
-# # ),
-# # routing_key="rpc_queue",
-# # )
-# user_id = 1895968253  # "vivera83" оба варианта работают
-#
-# # while True:
-# #     print(await bot.send_message(user_id, "Hello World!"))
-# #     await asyncio.sleep(3)

@@ -24,23 +24,7 @@ async def run_app():
     rabbit = RabbitAccessor(settings=RabbitMQSettings(), logger=logger)
     app = Application(bot, rabbit, logger)
     try:
-        await asyncio.gather(bot.connect(), rabbit.connect(), task(logger), app.start())
+        await asyncio.gather(bot.connect(), rabbit.connect(), app.start())
     except asyncio.CancelledError:
         await bot.disconnect()
         await rabbit.disconnect()
-
-
-# async def run_app():
-#     logger = setup_logging()
-#     bot = TgBotAccessor(logger=logger)
-#     rabbit = RabbitAccessor(settings=RabbitMQSettings(), logger=logger)
-#     try:
-#         await asyncio.gather(
-#             bot.connect(),
-#             rabbit.connect(),
-#             task(logger),
-#             app(bot, rabbit, logger),
-#         )
-#     except asyncio.CancelledError:
-#         await bot.disconnect()
-#         await rabbit.disconnect()

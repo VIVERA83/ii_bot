@@ -1,4 +1,6 @@
+import json
 import logging
+import uuid
 from typing import Callable, Any, Awaitable
 
 from aio_pika import Message, connect
@@ -43,10 +45,19 @@ class RabbitAccessor:
             await self.connection.close()
         self.logger.info(f"{self.__class__.__name__} disconnected")
 
-    async def consume(self, queue_name: str = "rpc_queue",
-                      callback: Callable[[AbstractIncomingMessage], Awaitable[Any]] = None):
-        queue = await self.channel.declare_queue(exclusive=True, name=queue_name)
-        await queue.consume(callback, no_ack=True)
+    async def create_queue(self) -> AbstractQueue:
+        return await self.channel.declare_queue(exclusive=True)
+
+    async def publish(self, reply_to: str, routing_key: str, correlation_id: str, body: bytes):
+        return await self.channel.default_exchange.publish(
+            Message(
+                body=body,
+                content_type="text/plain",
+                correlation_id=correlation_id,
+                reply_to=reply_to,
+            ),
+            routing_key=routing_key,
+        )
 
     def is_connected(self) -> bool:
         if getattr(self, "connection", None):
