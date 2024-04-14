@@ -123,7 +123,7 @@ class TgBotAccessor:
 
     def create_start_command(self) -> list[tuple[str, str, Callable[[], Coroutine]]]:
         return [
-            ("start", "знакомство с ботом", self.start),  # noqa
+            ("start", "знакомство с ботом", self.start),
         ]
 
     @staticmethod
