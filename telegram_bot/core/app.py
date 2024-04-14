@@ -1,6 +1,7 @@
 """The location of the final assembly of the application."""
 import asyncio
 
+from app import app
 from bot.accessor import TgBotAccessor
 from core.logger import setup_logging
 from core.settings import RabbitMQSettings
@@ -25,7 +26,9 @@ async def run_app():
         await asyncio.gather(
             bot.connect(),
             rabbit.connect(),
-            task(logger))
+            task(logger),
+            app(bot, rabbit, logger),
+        )
     except asyncio.CancelledError:
         await bot.disconnect()
         await rabbit.disconnect()

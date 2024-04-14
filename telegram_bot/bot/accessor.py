@@ -1,13 +1,12 @@
-import asyncio
 import logging
 from io import BytesIO
 from re import Pattern
-from typing import Any, Awaitable, Callable, Coroutine, Optional
+from typing import Any, Awaitable, Callable, Coroutine, Optional, Union
 
 from aiohttp import ClientConnectorError
 from telethon import TelegramClient, functions
 from telethon.events import NewMessage
-from telethon.tl.types import BotCommand, BotCommandScopeDefault
+from telethon.tl.types import BotCommand, BotCommandScopeDefault, Message
 
 from core.settings import TgSettings
 
@@ -34,20 +33,14 @@ class TgBotAccessor:
                  logger: logging.Logger = logging.getLogger(__name__)
                  ) -> None:
         self.settings = settings
-        self.queue_name = "rpc_queue"
-        self.action = "run"
         self.logger = logger
-
-    async def connect(self):
+        self._client = TelegramClient("bot", api_hash=self.settings.tg_api_hash, api_id=self.settings.tg_api_id)
         self.__commands = []
         self.__document_handlers = {}
         self.__command_handlers = {}
         self.__commands_regex_handler = {}
-        self._client = TelegramClient(
-            "bot", api_hash=self.settings.tg_api_hash, api_id=self.settings.tg_api_id
-        )
 
-        # async def run(self):
+    async def connect(self):
         self.bot = await self._client.start(  # noqa
             bot_token=self.settings.tg_bot_token
         )
@@ -151,3 +144,18 @@ class TgBotAccessor:
         self.__command_handlers = {
             f"/{command}": handler for command, _, handler in self.__commands
         }
+
+    async def send_message(self, user_id: Union[int, str], message: str) -> Message:
+        """A function that sends a message to a user identified by their user_id.
+
+        Parameters:
+            user_id (Union[int, str]): The ID of the user to send the message to.
+            message (str): The message to be sent.
+
+        Returns:
+            The result of sending the message.
+        """
+        return await self._client.send_message(user_id, message)
+
+    def is_connected(self) -> bool:
+        return self._client.is_connected()
