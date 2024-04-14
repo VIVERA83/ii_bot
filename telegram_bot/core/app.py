@@ -3,21 +3,28 @@ import asyncio
 
 from bot.accessor import TgBotAccessor
 from core.logger import setup_logging
+from rabbit.accessor import RabbitAccessor
 
 
-async def task():
+async def task(logger):
     while True:
         try:
             await asyncio.sleep(1)
         except asyncio.CancelledError:
-            print("cancelled")
+            logger.debug("cancelled")
             break
-        print("task")
+        logger.debug("task")
 
 
 async def run_app():
-    bot = TgBotAccessor(logger=setup_logging())
+    logger = setup_logging()
+    bot = TgBotAccessor(logger=logger)
+    rabbit = RabbitAccessor(logger=logger)
     try:
-        await asyncio.gather(bot.connect(), task())
+        await asyncio.gather(
+            bot.connect(),
+            rabbit.connect(),
+            task(logger))
     except asyncio.CancelledError:
-        await bot.stop()
+        await bot.disconnect()
+        await rabbit.disconnect()

@@ -56,7 +56,7 @@ class TgBotAccessor:
         self.logger.info(f"{self.__class__.__name__} connected.")
         await self._client.run_until_disconnected()
 
-    async def stop(self):
+    async def disconnect(self):
         await self._client.disconnect()
         self.logger.info(f"{self.__class__.__name__} disconnected.")
 
