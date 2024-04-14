@@ -4,6 +4,6 @@ Telegram bot
 
 Запуск приложения:
 ```bash
-python telegram_bot/main.py
+cd telegram_bot && python main.py
 ```
 
