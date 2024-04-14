@@ -5,10 +5,19 @@ from bot.accessor import TgBotAccessor
 from core.logger import setup_logging
 
 
-def run_app():
-    loop = asyncio.get_event_loop()
+async def task():
+    while True:
+        try:
+            await asyncio.sleep(1)
+        except asyncio.CancelledError:
+            print("cancelled")
+            break
+        print("task")
+
+
+async def run_app():
     bot = TgBotAccessor(logger=setup_logging())
     try:
-        loop.run_until_complete(bot.run())
-    except KeyboardInterrupt:
-        loop.run_until_complete(bot.stop())
+        await asyncio.gather(bot.connect(), task())
+    except asyncio.CancelledError:
+        await bot.stop()

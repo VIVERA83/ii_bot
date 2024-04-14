@@ -1,5 +1,7 @@
 """The application launcher."""
+import asyncio
+
 from core.app import run_app
 
 if __name__ == "__main__":
-    run_app()
+    asyncio.run(run_app())

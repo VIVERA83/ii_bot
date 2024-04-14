@@ -5,10 +5,11 @@ from re import Pattern
 from typing import Any, Awaitable, Callable, Coroutine, Optional
 
 from aiohttp import ClientConnectorError
-from telegram_bot.core.settings import TgSettings
 from telethon import TelegramClient, functions
 from telethon.events import NewMessage
 from telethon.tl.types import BotCommand, BotCommandScopeDefault
+
+from core.settings import TgSettings
 
 
 class TgBotAccessor:
@@ -35,10 +36,8 @@ class TgBotAccessor:
         self.queue_name = "rpc_queue"
         self.action = "run"
         self.logger = logger
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self._connect())
 
-    async def _connect(self):
+    async def connect(self):
         self.__commands = []
         self.__document_handlers = {}
         self.__command_handlers = {}
@@ -47,15 +46,8 @@ class TgBotAccessor:
         self._client = TelegramClient(
             "bot", api_hash=self.settings.tg_api_hash, api_id=self.settings.tg_api_id
         )
-        # self.bot = await self._client.start(  # noqa
-        #     bot_token=self.settings.tg_bot_token
-        # )
-        # self.bot.on(NewMessage())(self.event_handler)
-        # await self.add_commands(self.create_start_command())
-        # self.logger.info(f"{self.__class__.__name__} connected.")
-        # await self._client.run_until_disconnected()
 
-    async def run(self):
+    # async def run(self):
         self.bot = await self._client.start(  # noqa
             bot_token=self.settings.tg_bot_token
         )
