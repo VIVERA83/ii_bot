@@ -1,0 +1,6 @@
+aiohttp==3.9.4
+aio-pika==9.4.1
+pydantic==2.7.0
+pydantic_settings==2.2.1
+loguru==0.7.2
+telethon==1.34.0

@@ -1,4 +1,5 @@
 # Byte-compiled / optimized / DLL files
+telegram_bot/bot.session
 temp/
 __pycache__/
 *.py[cod]
