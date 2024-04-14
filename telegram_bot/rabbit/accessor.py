@@ -18,10 +18,10 @@ class RabbitAccessor:
     exchange: AbstractExchange
     queue: AbstractQueue
 
-    def __init__(
-            self, logger: logging.Logger = logging.getLogger(__name__)
-    ) -> None:
-        self.settings = RabbitMQSettings()
+    def __init__(self, settings: RabbitMQSettings = RabbitMQSettings(),
+                 logger: logging.Logger = logging.getLogger(__name__),
+                 ) -> None:
+        self.settings = settings
         self.queue_name = "rpc_queue"
         self.logger = logger
 

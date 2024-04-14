@@ -30,9 +30,10 @@ class TgBotAccessor:
         Pattern, Callable[[Any], Coroutine[None, None, None]]
     ]
 
-    def __init__(self, logger: logging.Logger = logging.getLogger(__name__)
+    def __init__(self, settings: TgSettings = TgSettings(),
+                 logger: logging.Logger = logging.getLogger(__name__)
                  ) -> None:
-        # self.settings = RabbitMQSettings()
+        self.settings = settings
         self.queue_name = "rpc_queue"
         self.action = "run"
         self.logger = logger
@@ -42,12 +43,11 @@ class TgBotAccessor:
         self.__document_handlers = {}
         self.__command_handlers = {}
         self.__commands_regex_handler = {}
-        self.settings = TgSettings()
         self._client = TelegramClient(
             "bot", api_hash=self.settings.tg_api_hash, api_id=self.settings.tg_api_id
         )
 
-    # async def run(self):
+        # async def run(self):
         self.bot = await self._client.start(  # noqa
             bot_token=self.settings.tg_bot_token
         )

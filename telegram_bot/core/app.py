@@ -3,6 +3,7 @@ import asyncio
 
 from bot.accessor import TgBotAccessor
 from core.logger import setup_logging
+from core.settings import RabbitMQSettings
 from rabbit.accessor import RabbitAccessor
 
 
@@ -19,7 +20,7 @@ async def task(logger):
 async def run_app():
     logger = setup_logging()
     bot = TgBotAccessor(logger=logger)
-    rabbit = RabbitAccessor(logger=logger)
+    rabbit = RabbitAccessor(settings=RabbitMQSettings(), logger=logger)
     try:
         await asyncio.gather(
             bot.connect(),
