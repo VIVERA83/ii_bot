@@ -2,8 +2,8 @@
 
 import asyncio
 
-from app import Application
-from app.utils import wait_connect
+from app import BaseApp
+from app.magnum import Magnum
 from bot.accessor import TgBotAccessor
 from core.logger import setup_logging
 from core.settings import RabbitMQSettings
@@ -24,7 +24,8 @@ async def run_app():
     logger = setup_logging()
     bot = TgBotAccessor(logger=logger)
     rabbit = RabbitAccessor(settings=RabbitMQSettings(), logger=logger)
-    app = Application(bot, rabbit, logger)
+    app =  Magnum(bot, rabbit, logger) #BaseApp(bot, rabbit, logger)
+
     try:
         await asyncio.gather(bot.connect(), rabbit.connect())
         await app.start()
