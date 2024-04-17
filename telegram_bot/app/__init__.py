@@ -15,7 +15,7 @@ from rabbit.accessor import RabbitAccessor
 
 class Application:
     def __init__(
-            self, bot: TgBotAccessor, rabbit: RabbitAccessor, logger: logging.Logger
+        self, bot: TgBotAccessor, rabbit: RabbitAccessor, logger: logging.Logger
     ):
         self.routing_key = "rpc_queue"
         self.bot = bot
@@ -25,38 +25,43 @@ class Application:
         self.in_queue = None
         self.futures: MutableMapping[str, asyncio.Future] = {}
         self.users: MutableMapping[str, str] = {}
+        self.queue_name = None
 
     async def start(self):
         await asyncio.gather(
             self._wait_connect(self.rabbit), self._wait_connect(self.bot)
         )
 
-        await self.bot.add_commands([("test", "тестовая команда", self._test_command)])  # noqa
+        await self.bot.add_commands(
+            [("test", "тестовая команда", self._test_command)]
+        )  # noqa
         self.bot.update_regex_command_handler(self.create_report_regex_command())
-
-        self.logger.info("Application started")
         await self.rabbit.channel.declare_queue(exclusive=True)
-        self.callback_queue = await self.rabbit.create_queue()
-        await asyncio.gather(
-            self.callback_queue.consume(callback=self._on_response, no_ack=True)
+        self.queue_name = await self.rabbit.consume(
+            callback=self._on_response, no_ack=True
         )
+        self.logger.info("Application started")
 
     async def stop(self):
         await self.rabbit.disconnect()
         await self.bot.disconnect()
         self.logger.info("Application stopped")
 
-    async def _test_command(self, *_, **__, ):
+    async def _test_command(
+        self,
+        *_,
+        **__,
+    ):
         return "Тестовый запрос принят"
 
     async def _command(
-            self,
-            login: str,
-            password: str,
-            course_type: COURSE_TYPE,
-            event: NewMessage.Event,
-            *_,
-            **__,
+        self,
+        login: str,
+        password: str,
+        course_type: COURSE_TYPE,
+        event: NewMessage.Event,
+        *_,
+        **__,
     ):
         data = {"login": login, "password": password, "course_type": course_type}
         correlation_id = await self.create_future(event.message.sender.username)
@@ -64,7 +69,8 @@ class Application:
         await self.rabbit.publish(
             routing_key=self.routing_key,
             correlation_id=correlation_id,
-            reply_to=self.callback_queue.name,
+            # reply_to=self.callback_queue.name,
+            reply_to=self.queue_name,
             body=json.dumps(data).encode("utf-8"),
         )
         self.logger.debug("Incoming test command")
@@ -115,7 +121,7 @@ class Application:
         self.logger.debug(f"Connected {client.__class__.__name__}")
 
     def create_report_regex_command(
-            self,
+        self,
     ) -> dict[re.Pattern, Callable[[Any], Coroutine[None, None, None]]]:
         """Create a report regex command.
 

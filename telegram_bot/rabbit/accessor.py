@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Awaitable, Callable, MutableMapping
 
 from aio_pika import Message, connect
 from aio_pika.abc import (
@@ -13,19 +14,18 @@ from core.settings import RabbitMQSettings
 
 
 class RabbitAccessor:
-    connection: AbstractConnection
-    channel: AbstractChannel
-    exchange: AbstractExchange
-    # queue: AbstractQueue
+    connection: AbstractConnection = None
+    channel: AbstractChannel = None
+    exchange: AbstractExchange = None
 
     def __init__(
-            self,
-            settings: RabbitMQSettings = RabbitMQSettings(),
-            logger: logging.Logger = logging.getLogger(__name__),
+        self,
+        settings: RabbitMQSettings = RabbitMQSettings(),
+        logger: logging.Logger = logging.getLogger(__name__),
     ) -> None:
         self.settings = settings
-        # self.queue_name = "rpc_queue"
         self.logger = logger
+        self.queues: MutableMapping[str, AbstractQueue] = {}
 
     async def reply_to(self, message: AbstractIncomingMessage, response: bytes) -> None:
         await self.exchange.publish(
@@ -41,7 +41,6 @@ class RabbitAccessor:
         self.connection = await connect(self.settings.dsn(True))
         self.channel = await self.connection.channel()
         self.exchange = self.channel.default_exchange
-        # self.queue = await self.channel.declare_queue(self.queue_name)
         self.logger.info(f"{self.__class__.__name__} connected")
 
     async def disconnect(self) -> None:
@@ -49,11 +48,22 @@ class RabbitAccessor:
             await self.connection.close()
         self.logger.info(f"{self.__class__.__name__} disconnected")
 
-    async def create_queue(self, name: str = None) -> AbstractQueue:
-        return await self.channel.declare_queue(name=name, exclusive=not name)
+    async def consume(
+        self,
+        callback: Callable[[AbstractIncomingMessage], Awaitable[Any]],
+        name: str = None,
+        no_ack: bool = False,
+    ) -> str:
+        if name:
+            assert not self.queues.get(name), f"Queue {name} already exists"
+        queue = await self.channel.declare_queue(name=name, exclusive=not name)
+
+        self.queues[queue.name] = queue
+        await queue.consume(callback=callback, no_ack=no_ack)
+        return queue.name
 
     async def publish(
-            self, reply_to: str, routing_key: str, correlation_id: str, body: bytes
+        self, reply_to: str, routing_key: str, correlation_id: str, body: bytes
     ):
         return await self.channel.default_exchange.publish(
             Message(
