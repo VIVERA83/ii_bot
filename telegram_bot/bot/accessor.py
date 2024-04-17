@@ -50,8 +50,8 @@ class TgBotAccessor:
         )
         self.bot.on(NewMessage())(self.event_handler)
         await self.add_commands(self.create_start_command())
+        # await self._client.run_until_disconnected()
         self.logger.info(f"{self.__class__.__name__} connected.")
-        await self._client.run_until_disconnected()
 
     async def disconnect(self):
         await self._client.disconnect()
