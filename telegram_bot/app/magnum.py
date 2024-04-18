@@ -30,9 +30,5 @@ class Magnum(BaseApp):
             re.compile(f"/report {pattern} {pattern} {pattern}"): self._command
         }
 
-    async def _test_command(
-            self,
-            *_,
-            **__,
-    ):
+    async def _test_command(self, *_, **__, ):
         return "Тестовый запрос принят"

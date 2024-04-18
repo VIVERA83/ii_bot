@@ -4,7 +4,7 @@ import logging
 
 import uuid
 
-from typing import MutableMapping, Callable
+from typing import MutableMapping, Callable, Optional
 
 from aio_pika.abc import AbstractIncomingMessage
 
