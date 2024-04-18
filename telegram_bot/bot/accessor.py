@@ -4,11 +4,10 @@ from re import Pattern
 from typing import Any, Awaitable, Callable, Coroutine, Optional, Union
 
 from aiohttp import ClientConnectorError
+from core.settings import TgSettings
 from telethon import TelegramClient, functions
 from telethon.events import NewMessage
 from telethon.tl.types import BotCommand, BotCommandScopeDefault, Message
-
-from core.settings import TgSettings
 
 
 class TgBotAccessor:

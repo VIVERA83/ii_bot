@@ -9,7 +9,6 @@ from aio_pika.abc import (
     AbstractIncomingMessage,
     AbstractQueue,
 )
-
 from core.settings import RabbitMQSettings
 
 

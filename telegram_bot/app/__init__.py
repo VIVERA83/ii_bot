@@ -1,18 +1,15 @@
 import asyncio
 import json
 import logging
-
 import uuid
-
-from typing import MutableMapping, Callable, Optional
+from typing import Callable, MutableMapping
 
 from aio_pika.abc import AbstractIncomingMessage
-
-from telethon.events import NewMessage
-
-from .utils import create_message, COURSE_TYPE, create_future
 from bot.accessor import TgBotAccessor
 from rabbit.accessor import RabbitAccessor
+from telethon.events import NewMessage
+
+from .utils import COURSE_TYPE, create_future, create_message
 
 
 def bot_d(routing_key: str):
@@ -22,8 +19,10 @@ def bot_d(routing_key: str):
             cls.users[correlation_id] = event.message.sender.username
             cls.futures[correlation_id] = create_future()
             result = await func(cls, *args, event=event, **kwargs)
-            if not cls.queue_names.get(cls.routing_key, None):
-                cls.queue_names[routing_key] = await cls.rabbit.consume(callback=cls._on_response, no_ack=True)
+            if not cls.queue_names.get(routing_key, None):
+                cls.queue_names[routing_key] = await cls.rabbit.consume(
+                    callback=cls._on_response, no_ack=True
+                )
             await cls.rabbit.publish(
                 routing_key=routing_key,
                 correlation_id=correlation_id,
@@ -39,9 +38,8 @@ def bot_d(routing_key: str):
 
 class BaseApp:
     def __init__(
-            self, bot: TgBotAccessor, rabbit: RabbitAccessor, logger: logging.Logger
+        self, bot: TgBotAccessor, rabbit: RabbitAccessor, logger: logging.Logger
     ):
-        self.routing_key = "rpc_queue"
         self.bot = bot
         self.rabbit = rabbit
         self.logger = logger

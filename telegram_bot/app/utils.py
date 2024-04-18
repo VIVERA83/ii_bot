@@ -24,7 +24,10 @@ def create_message(data: dict[str, str]) -> str:
     return message
 
 
-async def wait_connect(client: TgBotAccessor | RabbitAccessor, logger: logging.Logger = logging.getLogger(__name__)):
+async def wait_connect(
+    client: TgBotAccessor | RabbitAccessor,
+    logger: logging.Logger = logging.getLogger(__name__),
+):
     """A function that waits for the client to connect and logs messages.
 
     Parameters:
