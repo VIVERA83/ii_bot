@@ -10,6 +10,11 @@ COURSES = ["cpd", "epd", "etd", "d", "m", "z", "ce", "ee"]
 
 class Magnum(BaseApp):
 
+    def init_commands(self):
+        return [
+            ("help_magnum", "Справочник по командам магнум", self.hello),
+        ]
+
     def init_regex_command(
         self,
     ) -> dict[re.Pattern, Callable[[Any], Coroutine[None, None, None]]]:
@@ -35,3 +40,19 @@ class Magnum(BaseApp):
         return {  # type: ignore
             re.compile(f"/{command} {pattern} {pattern}"): self._command
         }
+
+    async def hello(self, *_, **__):
+        return """
+        **Справочник по командам**
+        Пока нет реализации удобной навигации, используется ручной ввод команд.
+        1️⃣ **__Прямая доставка категория С:__**
+        **/cpd**
+        2️⃣ **__Прямая доставка категория Е:__**
+        **/epd**
+        3️⃣ **__Транзитная доставка категория:__**         
+        **/etd**
+        4️⃣ **__Защитное вождение:__**
+        **/z**   
+        Пример: 
+        /z login password       
+        """

@@ -1,24 +1,13 @@
 from app import BaseApp
 
 
-class TestApp(BaseApp):
+class LaborProtect(BaseApp):
     def init_commands(self):
         return [
-            ("hello", "Привет", self.hello),
+            ("help_labor_protect", "Справочник по командам ОТ", self.hello),
         ]
 
     async def hello(self, *_, **__):
         return """
-        **Справочник по командам**
-        Пока нет реализации удобной навигации, используется ручной ввод команд.
-        1️⃣ **__Прямая доставка категория С:__**
-        **/cpd**
-        2️⃣ **__Прямая доставка категория Е:__**
-        **/epd**
-        3️⃣ **__Транзитная доставка категория:__**         
-        **/etd**
-        4️⃣ **__Защитное вождение:__**
-        **/z**   
-        Пример: 
-        ```/z login password```       
+        **Справочник по командам ОТ**       
         """
