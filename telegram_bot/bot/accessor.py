@@ -71,7 +71,8 @@ class TgBotAccessor:
         if handler:
             self.logger.warning(f"Command: {event.raw_text}")
             try:
-                result = await handler(*event.raw_text.split()[1:], event=event)  # noqa
+                result = await handler(*event.raw_text.split(), event=event)  # noqa
+                # result = await handler(*event.raw_text.split()[1:], event=event)  # noqa
                 if isinstance(result, BytesIO):
                     file = result
                     message = self.SUCCESS_MSG

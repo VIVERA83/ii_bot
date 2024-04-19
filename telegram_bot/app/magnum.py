@@ -1,46 +1,37 @@
 import re
-from typing import Any, Callable, Coroutine
+from typing import Any, Callable, Coroutine, Literal
 
-from app import COURSE_TYPE, BaseApp, bot_d
+from app import BaseApp, bot_d
 from telethon.events import NewMessage
+
+COURSE_TYPE = Literal["cpd", "epd", "etd", "d", "m", "z", "ce", "ee"]
+COURSES = ["cpd", "epd", "etd", "d", "m", "z", "ce", "ee"]
 
 
 class Magnum(BaseApp):
 
-    async def setup_bot_commands(self):
-        await self.bot.add_commands(
-            [("test", "тестовая команда", self._test_command)]
-        )  # noqa
-        self.bot.update_regex_command_handler(self.create_report_regex_command())
-
-    def create_report_regex_command(
+    def init_regex_command(
         self,
     ) -> dict[re.Pattern, Callable[[Any], Coroutine[None, None, None]]]:
+        return self.create_course_regex_command()
+
+    @bot_d(routing_key="rpc_queue")
+    async def _command(
+        self, course_type: COURSE_TYPE, login: str, password: str, **_: NewMessage.Event
+    ):
+        return {"login": login, "password": password, "course_type": course_type[1:]}
+
+    def create_course_regex_command(
+        self,
+    ) -> dict[re.Pattern, Callable[[Any], Coroutine[None, None, Any]]]:
         """Create a report regex command.
 
         Returns:
             bytes: A dictionary mapping compiled regex patterns to callback functions.
         """
+
+        command = f"(?:{'|'.join(COURSES)})"
         pattern = "[a-zA-Z0-9_]+"
-        return {  # noqa
-            re.compile(f"/report {pattern} {pattern} {pattern}"): self._command
+        return {  # type: ignore
+            re.compile(f"/{command} {pattern} {pattern}"): self._command
         }
-
-    async def _test_command(
-        self,
-        *_,
-        **__,
-    ):
-        return "Тестовый запрос принят"
-
-    @bot_d(routing_key="rpc_queue")
-    async def _command(
-        self,
-        login: str,
-        password: str,
-        course_type: COURSE_TYPE,
-        *_,
-        event: NewMessage.Event,
-    ):
-        data = {"login": login, "password": password, "course_type": course_type}
-        return data
