@@ -17,7 +17,8 @@ def bot_d(routing_key: str, message: str = "Запрос принят, ожид�
     def bot_decorator(func: Callable):
         async def wrapper(cls: "BaseApp", *args, event: NewMessage.Event, **kwargs):
             correlation_id = uuid.uuid4().hex
-            cls.users[correlation_id] = event.message.sender.username
+            # TODO: некоторые пользователи не дают username
+            cls.users[correlation_id] = event.message.sender.username or event.message.sender.id
             cls.futures[correlation_id] = create_future()
             result = await func(cls, *args, event=event, **kwargs)
             # TODO: сделать проверку на то что канал отрыт и если нет то на возврат ошибку
@@ -40,7 +41,7 @@ def bot_d(routing_key: str, message: str = "Запрос принят, ожид�
 
 class BaseApp:
     def __init__(
-        self, bot: TgBotAccessor, rabbit: RabbitAccessor, logger: logging.Logger
+            self, bot: TgBotAccessor, rabbit: RabbitAccessor, logger: logging.Logger
     ):
         self.bot = bot
         self.rabbit = rabbit
@@ -59,7 +60,7 @@ class BaseApp:
         return []
 
     def init_regex_command(
-        self,
+            self,
     ) -> dict[re.Pattern, Callable[[Any], Coroutine[None, None, None]]]:
         """Create a report regex command.
 
@@ -90,6 +91,7 @@ class BaseApp:
             return
         username = self.users.pop(message.correlation_id)
         result = await self._wait_future(message.correlation_id, message.body)
+        # TODO: сделать обработку некорректных данных в ответе
         message = create_message(json.loads(result.decode("utf-8")))
         await self.bot.send_message(username, message)
         self.logger.debug(f"Got response: {message}")
