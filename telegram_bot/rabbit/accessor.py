@@ -2,9 +2,13 @@ import logging
 from typing import Any, Awaitable, Callable, MutableMapping
 
 from aio_pika import Message, connect
-from aio_pika.abc import (AbstractChannel, AbstractConnection,
-                          AbstractExchange, AbstractIncomingMessage,
-                          AbstractQueue)
+from aio_pika.abc import (
+    AbstractChannel,
+    AbstractConnection,
+    AbstractExchange,
+    AbstractIncomingMessage,
+    AbstractQueue,
+)
 from core.settings import RabbitMQSettings
 
 

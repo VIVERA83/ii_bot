@@ -41,7 +41,8 @@ class Magnum(BaseApp):
             re.compile(f"/{command} {pattern} {pattern}"): self._command
         }
 
-    async def hello(self, *_, **__):
+    @staticmethod
+    async def hello(*_, **__):
         return """
         **Справочник по командам**
         Пока нет реализации удобной навигации, используется ручной ввод команд.
@@ -53,6 +54,11 @@ class Magnum(BaseApp):
         **/etd**
         4️⃣ **__Защитное вождение:__**
         **/z**   
+        5️⃣ **__Водитель диспетчер:__**
+        **/d**
+        6️⃣ **__Наставник:__**
+        **/m**
+        
         Пример: 
-        /z login password       
+        /z user_name token       
         """
