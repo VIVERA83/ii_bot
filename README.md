@@ -13,3 +13,6 @@ cd telegram_bot && python main.py
 ```bash
   docker build  -t telegram_bot .
 ```
+```bash
+docker build -t vivera83/ii_bot:1 .
+```  
