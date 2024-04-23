@@ -3,7 +3,6 @@ from typing import Callable, Any, Coroutine
 from telethon.events import NewMessage
 
 from app import BaseApp, bot_d
-from icecream import ic
 
 REPORTS = [
     "date_range",
