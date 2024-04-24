@@ -1,3 +1,8 @@
+import asyncio
+
+from asyncio import Future
+
+
 def create_message(data: dict[str, str]) -> str:
     """Create message using the given data dictionary and return the constructed message as a string.
 
@@ -11,3 +16,9 @@ def create_message(data: dict[str, str]) -> str:
     for key, value in data.items():
         message += f"{key}: {value}\n"
     return message
+
+
+def create_future() -> Future:
+    loop = asyncio.get_running_loop()
+    future = loop.create_future()
+    return future
