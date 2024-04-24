@@ -49,7 +49,6 @@ class TgBotAccessor:
         )
         self.bot.on(NewMessage())(self.event_handler)
         await self.add_commands(self.create_start_command())
-        # await self._client.run_until_disconnected()
         self.logger.info(f"{self.__class__.__name__} connected.")
 
     async def disconnect(self):
@@ -72,7 +71,6 @@ class TgBotAccessor:
             self.logger.warning(f"Command: {event.raw_text}")
             try:
                 result = await handler(*event.raw_text.split(), event=event)  # noqa
-                # result = await handler(*event.raw_text.split()[1:], event=event)  # noqa
                 if isinstance(result, BytesIO):
                     file = result
                     message = self.SUCCESS_MSG
