@@ -3,8 +3,8 @@ import re
 from typing import Any, Callable, Coroutine
 
 from app import BaseApp
-from app.magnum import Magnum
 from app.labor_protect import LaborProtect
+from app.magnum import Magnum
 from app.speed import Speed
 from bot.accessor import TgBotAccessor
 from rabbit.accessor import RabbitAccessor
@@ -18,7 +18,9 @@ class MainApp(BaseApp):
         logger: logging.Logger = logging.getLogger(__name__),
     ):
         super().__init__(bot, rabbit, logger)
-        self.children = [app(bot, rabbit, logger) for app in [Magnum, LaborProtect, Speed]]
+        self.children = [
+            app(bot, rabbit, logger) for app in [Magnum, LaborProtect, Speed]
+        ]
 
     #
     def init_commands(self) -> list[tuple[str, str, Callable[[], Coroutine]]]:

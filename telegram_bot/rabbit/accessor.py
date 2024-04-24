@@ -19,9 +19,9 @@ class RabbitAccessor:
     exchange: AbstractExchange = None
 
     def __init__(
-            self,
-            settings: RabbitMQSettings = RabbitMQSettings(),
-            logger: logging.Logger = logging.getLogger(__name__),
+        self,
+        settings: RabbitMQSettings = RabbitMQSettings(),
+        logger: logging.Logger = logging.getLogger(__name__),
     ) -> None:
         self.settings = settings
         self.logger = logger
@@ -38,8 +38,9 @@ class RabbitAccessor:
         self.logger.debug(f" [x] Sent {response!r}")
 
     async def connect(self) -> None:
-        self.connection = await before_execution(total_timeout=20,
-                                                 raise_exception=True)(connect)(self.settings.dsn(True))
+        self.connection = await before_execution(
+            total_timeout=20, raise_exception=True
+        )(connect)(self.settings.dsn(True))
         self.channel = await self.connection.channel()
         self.exchange = self.channel.default_exchange
         self.logger.info(f"{self.__class__.__name__} connected")
@@ -50,10 +51,10 @@ class RabbitAccessor:
         self.logger.info(f"{self.__class__.__name__} disconnected")
 
     async def consume(
-            self,
-            callback: Callable[[AbstractIncomingMessage], Awaitable[Any]],
-            name: str = None,
-            no_ack: bool = False,
+        self,
+        callback: Callable[[AbstractIncomingMessage], Awaitable[Any]],
+        name: str = None,
+        no_ack: bool = False,
     ) -> str:
         if name:
             assert not self.queues.get(name), f"Queue {name} already exists"
@@ -64,7 +65,7 @@ class RabbitAccessor:
         return queue.name
 
     async def publish(
-            self, reply_to: str, routing_key: str, correlation_id: str, body: bytes
+        self, reply_to: str, routing_key: str, correlation_id: str, body: bytes
     ):
         return await self.channel.default_exchange.publish(
             Message(

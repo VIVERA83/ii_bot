@@ -1,8 +1,7 @@
 import re
-from typing import Callable, Any, Coroutine
+from typing import Any, Callable, Coroutine
 
 from app import BaseApp, bot_d
-
 from telethon.events import NewMessage
 
 
@@ -12,13 +11,15 @@ class LaborProtect(BaseApp):
             ("help_labor_protect", "Справочник по командам ОТ", self.hello),
         ]
 
-    def init_regex_command(self, ) -> dict[re.Pattern, Callable[[Any], Coroutine[None, None, None]]]:
+    def init_regex_command(
+        self,
+    ) -> dict[re.Pattern, Callable[[Any], Coroutine[None, None, None]]]:
         pattern = "[a-zA-Z0-9_]+"
         return {re.compile(f"/lp {pattern} {pattern}"): self._command}  # type: ignore
 
     @bot_d(routing_key="labor_protect_rpc_queue")
     async def _command(
-            self, command: str, login: str, password: str, **_: NewMessage.Event
+        self, command: str, login: str, password: str, **_: NewMessage.Event
     ):
         return {"login": login, "password": password}
 
