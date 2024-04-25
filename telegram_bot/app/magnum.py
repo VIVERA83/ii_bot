@@ -36,7 +36,7 @@ class Magnum(BaseApp):
         """
 
         command = f"(?:{'|'.join(COURSES)})"
-        pattern = "[a-zA-Z0-9_]+"
+        pattern = "[a-zA-Z0-9_!*$%#@()?]+"
         return {  # type: ignore
             re.compile(f"/{command} {pattern} {pattern}"): self._command
         }
