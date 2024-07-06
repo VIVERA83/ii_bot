@@ -1,0 +1,17 @@
+services:
+  rabbitmq:
+    container_name: rabbit
+    image: rabbitmq:3-management
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:15672" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - 5672:5672
+
+volumes:
+  postgres_ii_volume:
+
