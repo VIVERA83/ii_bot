@@ -3,7 +3,7 @@ import re
 from typing import Any, Callable, Coroutine
 
 from app import BaseApp
-from app.labor_protect import LaborProtect
+from app.labor_protect.labor_protect import LaborProtect
 from app.magnum import Magnum
 from app.speed import Speed
 from bot.accessor import TgBotAccessor
