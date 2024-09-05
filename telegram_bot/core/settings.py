@@ -78,3 +78,8 @@ class RabbitMQSettings(Base):
             host=self.rabbit_host,
             port=self.rabbit_port,
         )
+
+
+class ClickerSettings(Base):
+    start_url: str
+    magnum_url: str

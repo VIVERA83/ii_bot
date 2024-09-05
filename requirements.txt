@@ -4,3 +4,5 @@ pydantic==2.7.0
 pydantic_settings==2.2.1
 loguru==0.7.2
 telethon==1.34.0
+# удалить после отладки
+icecream==2.1.3

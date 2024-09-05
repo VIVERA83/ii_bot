@@ -18,14 +18,23 @@ class LaborProtect(BaseApp):
     def init_regex_command(
             self,
     ) -> dict[re.Pattern, Callable[[Any], Coroutine[None, None, None]]]:
-        pattern = "[a-zA-Z0-9а-яА-Я_]+"
-        return {re.compile(f"/lp {pattern} {pattern}"): self._command}  # type: ignore
+        pattern = "[a-zA-Z0-9а-яА-Я_*]+"
+        return {  # type: ignore
+            re.compile(f"/lpa{pattern} {pattern}"): self._command_a,
+            re.compile(f"/lpb {pattern} {pattern}"): self._command_b,
+        }
 
     @bot_d(routing_key="labor_protect_rpc_queue")
-    async def _command(
+    async def _command_a(
             self, command: str, login: str, password: str, **_: NewMessage.Event
     ):
-        return {"login": login, "password": password}
+        return {"login": login, "password": password, "course_type": 2311}
+
+    @bot_d(routing_key="labor_protect_rpc_queue")
+    async def _command_b(
+            self, command: str, login: str, password: str, **_: NewMessage.Event
+    ):
+        return {"login": login, "password": password, "course_type": 2393}
 
     @staticmethod
     async def help(*_, **__):
@@ -33,9 +42,9 @@ class LaborProtect(BaseApp):
         **Справочник по командам**
         Пока нет реализации удобной навигации, используется ручной ввод команд.
         1️⃣ **__Озрана труда и оказание первой медицинской помощи:__**
-        **/lp**   
+        **/lpa**   
         Пример: 
-        /lp user_name token       
+        /lpa user_name token       
         """
 
     async def _on_response(self, message: AbstractIncomingMessage) -> None:
@@ -52,14 +61,22 @@ class LaborProtect(BaseApp):
         await self.bot.send_message(username, message)
         self.logger.debug(f"сообщение отправлено {message}")
 
-    def _create_response_message(self, message: bytes) -> str:
+    @staticmethod
+    def _create_response_message(message: bytes) -> str:
         json_data = json.loads(message.decode("utf-8"))
         ic(json_data)
+        if json_data["status"] == "OK":
+            return (f"**результат запроса:**\n"
+                    f"\n"
+                    f"Пользователь:  {json_data['user']}\n"
+                    f"Статус:  {json_data['status']}\n"
+                    f"Сообщение:  {json_data['message']}\n"
+                    f"Пройденный курс: {json_data['course']}\n"
+                    f"Результат:  {json_data['result']}\n"
+                    )
+
         return (f"**результат запроса:**\n"
                 f"\n"
-                f"Пользователь:  {json_data['user']}\n"
                 f"Статус:  {json_data['status']}\n"
                 f"Сообщение:  {json_data['message']}\n"
-                f"Пройденный курс: {json_data['course']}\n"
-                f"Результат:  {json_data['result']}\n"
                 )
