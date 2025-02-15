@@ -1,4 +1,5 @@
 services:
+
   rabbitmq:
     container_name: rabbit
     image: rabbitmq:3-management
@@ -11,6 +12,15 @@ services:
       retries: 5
     ports:
       - ${RABBIT_PORT}:${RABBIT_PORT}
+
+  bot:
+    container_name: bot
+    env_file:
+      - .env
+    build:
+      context: .
+    depends_on:
+      - rabbitmq
 
 volumes:
   postgres_ii_volume:

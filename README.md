@@ -4,51 +4,18 @@ Telegram bot
 
 Запуск приложения:
 
-Устанавливаем зависимости
+1. Устанавливаем зависимости 
+    ```bash
+    pip install -r requirements.txt
+    ```
+2. Создать в корневом каталоге `.env` файл. По аналогии с примеров в [env.example](env.example)
+за подробностями идем [сюда](docs/telegram.md)
+3. Запуск, переходим в [telegram_bot](telegram_bot) и запускаем `main.py`. Перед запуском убедитесь что запущен RabbitMQ или указаны корректные данные для подключения к нему в переменных окружения
+    ```bash
+    cd telegram_bot && python main.py
+    ```
+
+Запуск приложения в Docker:
 ```bash
-pip install -r requirements.txt
+   docker compose up --build -d
 ```
-Далее нам необходимо создать в корневом каталоге `.env` файл. по аналогии с примеров в [env.example](env.example)
-пояснения по переменным окружения:
-все что касается 
-TG_API_ID="https://my.telegram.org/apps"
-
-В него прописываем:
-```
-# Settings logging
-LEVEL="DEBUG"
-GURU="True"
-TRACEBACK="False"
-
-# Settings Telegram  
-TG_API_ID="https://my.telegram.org/apps"
-TG_API_HASH="https://my.telegram.org/apps"
-TG_BOT_TOKEN="https://my.telegram.org/apps"
-TG_ADMIN_ID="123456789"
-
-# Settings for RabbitMQ
-RABBIT_USER="guest"
-RABBIT_PASSWORD="guest"
-RABBIT_HOST="0.0.0.0"
-RABBIT_PORT="5672"
-```
-
-
-```bash
-cd telegram_bot && python main.py
-```
-
-Создание контейнера:
-
-```bash
-  docker build  -t telegram_bot .
-```
-```bash
-docker build -t vivera83/ii_bot:1 .
-```  
-
-
-```bash
-docker push vivera83/ii_bot:1
-```  
-
