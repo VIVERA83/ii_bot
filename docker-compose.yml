@@ -10,7 +10,7 @@ services:
       timeout: 5s
       retries: 5
     ports:
-      - 5672:5672
+      - ${RABBIT_PORT}:${RABBIT_PORT}
 
 volumes:
   postgres_ii_volume:

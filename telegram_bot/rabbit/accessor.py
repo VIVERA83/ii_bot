@@ -10,7 +10,7 @@ from aio_pika.abc import (
     AbstractQueue,
 )
 from core.settings import RabbitMQSettings
-from rabbit.backoff import before_execution
+from .backoff import before_execution
 
 
 class RabbitAccessor:
